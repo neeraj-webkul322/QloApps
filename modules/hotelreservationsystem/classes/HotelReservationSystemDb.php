@@ -518,7 +518,8 @@ class HotelReservationSystemDb
             (2, 'icon-dollar', 'index.php?controller=AdminHotelFeaturePricesSettings', 0, 2, 1, 1, NOW(), NOW()),
             (3, 'icon-plus-square', 'index.php?controller=AdminRoomTypeGlobalDemand', 0, 3, 1, 1, NOW(), NOW()),
             (4, 'icon-file-text', 'index.php?controller=AdminAboutHotelBlockSetting', 0, 4, 0, 1, NOW(), NOW()),
-            (5, 'icon-th-list', 'index.php?controller=AdminFeaturesModuleSetting', 0, 5, 0, 1, NOW(), NOW());",
+            (5, 'icon-th-list', 'index.php?controller=AdminFeaturesModuleSetting', 0, 5, 0, 1, NOW(), NOW()),
+            (6, 'icon-picture-o', 'index.php?controller=AdminHotelBackgroundImageSettings', 0, 6, 1, 1, NOW(), NOW());",
 
             "CREATE TABLE IF NOT EXISTS `"._DB_PREFIX_."htl_settings_link_lang` (
                 `id_settings_link` int(10) unsigned NOT NULL,
@@ -550,6 +551,10 @@ class HotelReservationSystemDb
 
             "INSERT INTO `"._DB_PREFIX_."htl_settings_link_lang` (`id_settings_link`, `id_lang`, `name`, `hint`)
             SELECT 5, `id_lang`, 'Hotel Amenities Block', 'Configure Hotels Amenities settings. You can display hotel amenities images using this block. This block will be displayed on home page.'
+            FROM `"._DB_PREFIX_."lang`
+            ORDER BY `id_lang`;",
+            "INSERT INTO `"._DB_PREFIX_."htl_settings_link_lang` (`id_settings_link`, `id_lang`, `name`, `hint`)
+            SELECT 6, `id_lang`, 'Background Image Settings', 'Configure the homepage background type and media inputs.'
             FROM `"._DB_PREFIX_."lang`
             ORDER BY `id_lang`;",
         );

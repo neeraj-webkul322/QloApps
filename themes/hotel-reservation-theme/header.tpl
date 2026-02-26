@@ -86,7 +86,29 @@
 		{/if}
 		<div id="page" style="{if $page_name == 'index'}height: 100%;{/if}">
 			<div class="header-container" style="{if $page_name == 'index'}height: 100%;{/if}">
-				<header id="header" style='{if $page_name == "index"}background-image:url("{$link->getMediaLink("`$smarty.const._PS_IMG_`{Configuration::get('WK_HOTEL_HEADER_IMAGE')}")}"); height: 100%;{else}background-color:#252525;{/if}' >
+				<header
+					id="header"
+					class="{if $page_name == 'index' && isset($wk_home_background.resolved_type)}wk-home-bg-{$wk_home_background.resolved_type|escape:'html':'UTF-8'}{/if}"
+					style="{if $page_name == 'index' && isset($wk_home_background.header_style)}{$wk_home_background.header_style|escape:'html':'UTF-8'}{else}background-color:#252525;{/if}"
+				>
+					{if $page_name == 'index' && isset($wk_home_background.resolved_type) && $wk_home_background.resolved_type == 'slider' && isset($wk_home_background.slider_images) && $wk_home_background.slider_images|@count}
+						<div id="wk-home-bg-slider-layer">
+							{foreach from=$wk_home_background.slider_images item=wk_bg_slide}
+								<div class="wk-home-bg-slide{if $wk_bg_slide@first} active{/if}" style="background-image:url('{$wk_bg_slide.url|escape:'html':'UTF-8'}');"></div>
+							{/foreach}
+						</div>
+					{/if}
+					{if $page_name == 'index' && isset($wk_home_background.resolved_type) && $wk_home_background.resolved_type == 'video' && isset($wk_home_background.video.provider) && $wk_home_background.video.provider}
+						<div id="wk-home-bg-video-layer">
+							{if $wk_home_background.video.provider == 'file' && isset($wk_home_background.video.source_url) && $wk_home_background.video.source_url}
+								<video autoplay muted loop playsinline>
+									<source src="{$wk_home_background.video.source_url|escape:'html':'UTF-8'}" type="video/mp4">
+								</video>
+							{elseif ($wk_home_background.video.provider == 'youtube' || $wk_home_background.video.provider == 'vimeo') && isset($wk_home_background.video.embed_url) && $wk_home_background.video.embed_url}
+								<iframe src="{$wk_home_background.video.embed_url|escape:'html':'UTF-8'}" allow="autoplay; fullscreen; encrypted-media" allowfullscreen></iframe>
+							{/if}
+						</div>
+					{/if}
 					<div class="banner">
 						<div class="container">
 							<div class="row">

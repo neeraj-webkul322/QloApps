@@ -202,6 +202,7 @@ class AdminHotelConfigurationSettingController extends ModuleAdminController
 
     public function renderView()
     {
+        $this->ensureBackgroundImageSettingsLink();
         $settingsLinks = $this->object->getAllSettingsLinks();
         foreach ($settingsLinks as $index => &$settingsLink) {
             $settingsLink['generated_link'] = $this->object->generateLink($settingsLink['link']);
@@ -212,6 +213,50 @@ class AdminHotelConfigurationSettingController extends ModuleAdminController
         );
 
         return parent::renderView();
+    }
+
+    protected function ensureBackgroundImageSettingsLink()
+    {
+        $controllerName = 'AdminHotelBackgroundImageSettings';
+        $link = 'index.php?controller='.$controllerName;
+        $idTab = (int) Tab::getIdFromClassName($controllerName);
+
+        if (!$idTab) {
+            $tab = new Tab();
+            $tab->active = 1;
+            $tab->class_name = $controllerName;
+            $tab->module = 'hotelreservationsystem';
+            $tab->id_parent = (int) Tab::getIdFromClassName('AdminHotelConfigurationSetting');
+            $tab->name = array();
+            foreach (Language::getLanguages(true) as $language) {
+                $tab->name[$language['id_lang']] = 'Background Image Settings';
+            }
+            $tab->add();
+        }
+
+        $idSettingsLink = (int) Db::getInstance()->getValue(
+            'SELECT `id_settings_link` FROM `'._DB_PREFIX_.'htl_settings_link`
+            WHERE `link` = "'.pSQL($link).'"'
+        );
+
+        if (!$idSettingsLink) {
+            $objSettingsLink = new HotelSettingsLink();
+            $objSettingsLink->icon = 'icon-picture-o';
+            $objSettingsLink->link = $link;
+            $objSettingsLink->new_window = 0;
+            $objSettingsLink->position = (int) $objSettingsLink->getHigherPosition();
+            $objSettingsLink->unremovable = 1;
+            $objSettingsLink->active = 1;
+
+            $objSettingsLink->name = array();
+            $objSettingsLink->hint = array();
+            foreach (Language::getLanguages(false) as $language) {
+                $objSettingsLink->name[(int) $language['id_lang']] = 'Background Image Settings';
+                $objSettingsLink->hint[(int) $language['id_lang']] = 'Configure the homepage background type and media inputs.';
+            }
+
+            $objSettingsLink->save();
+        }
     }
 
     public function postProcess()

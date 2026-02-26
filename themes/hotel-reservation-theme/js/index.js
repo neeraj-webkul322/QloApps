@@ -25,4 +25,42 @@
 
 $(document).ready(function(){
 	$('#home-page-tabs li:first, #index .tab-content ul:first').addClass('active');
+
+    if (typeof wkHomeBackgroundMedia === 'undefined' || !wkHomeBackgroundMedia) {
+        return;
+    }
+
+    if (wkHomeBackgroundMedia.type !== 'slider') {
+        return;
+    }
+
+    var $sliderLayer = $('#wk-home-bg-slider-layer');
+    var $slides = $sliderLayer.find('.wk-home-bg-slide');
+    if (!$slides.length) {
+        return;
+    }
+
+    if ($slides.length === 1) {
+        $slides.eq(0).addClass('active');
+        return;
+    }
+
+    var currentIndex = parseInt(wkHomeBackgroundMedia.activeIndex, 10);
+    var interval = parseInt(wkHomeBackgroundMedia.interval, 10);
+
+    if (isNaN(currentIndex) || currentIndex < 0 || currentIndex >= $slides.length) {
+        currentIndex = 0;
+    }
+
+    if (isNaN(interval) || interval < 1000) {
+        interval = 5000;
+    }
+
+    $slides.removeClass('active').eq(currentIndex).addClass('active');
+    window.setInterval(function () {
+        var nextIndex = (currentIndex + 1) % $slides.length;
+        $slides.eq(currentIndex).removeClass('active');
+        $slides.eq(nextIndex).addClass('active');
+        currentIndex = nextIndex;
+    }, interval);
 });
