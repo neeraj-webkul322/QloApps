@@ -571,14 +571,14 @@ class AdminHotelRoomsBookingController extends ModuleAdminController
         $bookingParams['date_to'] = $searchDateTo;
         if ($bookingData = $objBookingDetail->getBookingData($bookingParams)) {
             if ($bookingData['stats']['num_avail']) {
-                $eventColor = '#7EC77B';
-                $title = sprintf($this->l('Available Rooms : %s'), $bookingData['stats']['num_avail']);
+                $eventColor = '#325531ff';
+                $title = sprintf($this->l('  %s  Available Rooms'), $bookingData['stats']['num_avail']);
             } elseif ($bookingData['stats']['num_part_avai']) {
                 $eventColor = '#FFC224';
-                $title = sprintf($this->l('Partially Available Rooms : %s'), $bookingData['stats']['num_part_avai']);
+                $title = sprintf($this->l('  %s  Partially Available Rooms'), $bookingData['stats']['num_part_avai']);
             } else {
-                $eventColor = '#FF3838';
-                $title = sprintf($this->l('Available Rooms : %s'), $bookingData['stats']['num_avail']);
+                $eventColor = '#d62222ff';
+                $title = sprintf($this->l('  %s  Available Rooms'), $bookingData['stats']['num_avail']);
             }
             $bookingData['date_from_format'] = Tools::displayDate($searchDateFrom);
             $bookingData['date_to_format'] = Tools::displayDate($searchDateTo);
@@ -586,9 +586,10 @@ class AdminHotelRoomsBookingController extends ModuleAdminController
                 'title' => $title,
                 'start' => date('Y-m-d', strtotime($searchDateFrom)),
                 'end' => date('Y-m-d', strtotime($searchDateTo)),
-                'backgroundColor' => $eventColor,
-                'color' => $eventColor,
-                'textColor' => '#FFF',
+                'backgroundColor' => '#FFFFFF',
+                'borderColor' => $eventColor,
+                'borderWidth' => '5px',
+                'textColor' => '#000000',
                 'data' => $bookingData
             );
         }

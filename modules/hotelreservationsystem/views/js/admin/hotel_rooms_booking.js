@@ -51,16 +51,39 @@ $(document).ready(function() {
             },
             eventDidMount: function(info) {
                 if (info.event.extendedProps.is_notification) {
-                    if (info.event.extendedProps.data.stats.num_avail > 0) {
-                        $(info.el).closest('td').find('.day-info svg circle').attr('fill', '#7EC77B');
-                    } else if (info.event.extendedProps.data.stats.num_part_avai > 0) {
-                        $(info.el).closest('td').find('.day-info svg circle').attr('fill', '#FFC224');
-                    } else if ((info.event.extendedProps.data.stats.num_booked == info.event.extendedProps.data.stats.total_rooms) && info.event.extendedProps.data.stats.total_rooms != 0) {
-                        $(info.el).closest('td').find('.day-info svg circle').attr('fill', '#00AFF0');
-                    } else {
-                        $(info.el).closest('td').find('.day-info svg circle').attr('fill', '#FF3838');
+                    // Apply background color to the date cell based on availability status
+                    let cell = $(info.el).closest('td.fc-daygrid-day');
+
+                    if (!info.event.extendedProps.data || !info.event.extendedProps.data.stats) {
+                        return;
                     }
-                    $(info.el).closest('td').find('.day-info').tooltip({
+
+                    let stats = info.event.extendedProps.data.stats;
+                    
+                    // Check for available rooms - support both num_avail and total_rooms properties
+                    let numAvail = stats.num_avail;
+                    if (typeof numAvail === 'undefined' && typeof stats.total_rooms !== 'undefined') {
+                        // Calculate available rooms if not directly provided
+                        numAvail = stats.total_rooms - (stats.num_booked || 0);
+                    }
+                    
+                    if (numAvail > 0) {
+                        // Green - Available rooms
+                        cell.css('background-color', '#adceacff');
+                    } else if (stats.num_part_avai > 0) {
+                        // Yellow - Partially available
+                        cell.css('background-color', '#f0d797ff');
+                    }
+                    // else if ((stats.num_booked == stats.total_rooms) && stats.total_rooms != 0) {
+                    //     // Blue - Fully booked
+                    //     cell.css('background-color', '#84b8cbff');
+                    // }
+                    else {
+                        // Red - Unavailable
+                        cell.css('background-color', '#efa3a3ff');
+                    }
+
+                    cell.tooltip({
                         content: function()
                         {
                             $('#date-stats-tooltop .tip_date').text(info.event.extendedProps.data.date_format);
@@ -98,23 +121,21 @@ $(document).ready(function() {
                                 return false;
                             }
 
-                        // ajax function to pull in data and add it to the tooltip goes here
-                    },
-                    close: function(event, ui)
-                    {
-                        ui.tooltip.hover(function() {
-                            $(this).stop(true).fadeTo(300, 1);
                         },
-                        function() {
-                            $(this).fadeOut('300', function()
-                            {
-                                $(this).remove();
+                        close: function(event, ui)
+                        {
+                            ui.tooltip.hover(function() {
+                                $(this).stop(true).fadeTo(300, 1);
+                            },
+                            function() {
+                                $(this).fadeOut('300', function()
+                                {
+                                    $(this).remove();
+                                });
                             });
-                        });
-                    }
-                });
-                info.event.remove();
-            } else {
+                        }
+                    });
+                } else {
                 $(info.el).tooltip({
                     content: function()
                     {
@@ -174,11 +195,6 @@ $(document).ready(function() {
                     });
                 }
             },
-            dayCellDidMount: (arg)  => {
-
-                let svg = $('#svg-icon').html();
-                $(arg.el).find('.fc-daygrid-day-top').append('<a class="day-info">'+svg+'</a>');
-            },
             datesSet: function(arg) {
                 if($('.fc-event').tooltip()) {
                     $('.fc-event').tooltip('destroy');
@@ -189,7 +205,7 @@ $(document).ready(function() {
     }
 
     function removeInitializedTooltips() {
-        $('#fullcalendar a.day-info, #fullcalendar .fc-daygrid-event').each(function () {
+        $('#fullcalendar td.fc-daygrid-day, #fullcalendar .fc-daygrid-event').each(function () {
             if ($(this).data('ui-tooltip')) {
                 $(this).tooltip('destroy');
             }

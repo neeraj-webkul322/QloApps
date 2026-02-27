@@ -635,3 +635,13 @@ body.adminhotelroomsbooking .ui-tooltip {
 .error-border {
     outline: rgb(210, 124, 130) solid 1px;
     border-radius: 2px;}
+.fc-event-title{
+    font-size: 15px;
+}
+.fc-event-title-container{
+    border-left: 3px;
+}
+.fc-daygrid-event.fc-event.fc-event-start.fc-event-end:has(.fc-event-title-container){
+    border-left-width: 4px;
+    border-left-style: solid;
+}
