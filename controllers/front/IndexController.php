@@ -70,25 +70,23 @@ class IndexControllerCore extends FrontController
 
     protected function getSliderBackgroundImages()
     {
-        $raw = Configuration::get('WK_BG_SLIDER_IMAGES');
-        $decoded = json_decode((string) $raw, true);
-        if (!is_array($decoded)) {
-            return array();
+        if (!class_exists('HeaderSliderImage')) {
+            require_once _PS_MODULE_DIR_.'hotelreservationsystem/classes/HeaderSliderImage.php';
         }
 
         $images = array();
-        foreach ($decoded as $row) {
-            if (!is_array($row) || !isset($row['path']) || !$row['path']) {
+        foreach (HeaderSliderImage::getAllSliderImages() as $row) {
+            if (!isset($row['image_path']) || !$row['image_path']) {
                 continue;
             }
 
-            $path = trim((string) $row['path']);
+            $path = trim((string) $row['image_path']);
             if (!$path) {
                 continue;
             }
 
             $images[] = array(
-                'id' => isset($row['id']) ? (int) $row['id'] : 0,
+                'id' => (int) $row['id_header_slider_image'],
                 'position' => isset($row['position']) ? (int) $row['position'] : 0,
                 'url' => $this->buildHotelReservationModuleMediaUrl($path),
             );
@@ -136,7 +134,7 @@ class IndexControllerCore extends FrontController
             return '';
         }
 
-        return 'https://www.youtube.com/embed/'.urlencode($videoId).'?autoplay=1&mute=1&loop=1&playlist='.urlencode($videoId).'&controls=0&rel=0';
+        return 'https://www.youtube.com/embed/'.urlencode($videoId).'?autoplay=1&mute=1&loop=1&controls=0&rel=0';
     }
 
     protected function getVimeoEmbedUrl($url)
@@ -176,7 +174,9 @@ class IndexControllerCore extends FrontController
             'vimeo_url' => $vimeoUrl,
         );
 
-        if ($videoPath) {
+        $videoSource = Configuration::get('WK_BG_VIDEO_SOURCE');
+
+        if ($videoSource=='upload_video' && $videoPath) {
             if (Validate::isAbsoluteUrl($videoPath)) {
                 $videoData['provider'] = 'file';
                 $videoData['source_url'] = $videoPath;
@@ -186,7 +186,7 @@ class IndexControllerCore extends FrontController
             }
         }
 
-        if (!$videoData['provider'] && $youtubeUrl) {
+        if (($videoSource=='youtube_url' || !$videoData['provider']) && $youtubeUrl) {
             $youtubeEmbedUrl = $this->getYoutubeEmbedUrl($youtubeUrl);
             if ($youtubeEmbedUrl) {
                 $videoData['provider'] = 'youtube';
@@ -194,7 +194,7 @@ class IndexControllerCore extends FrontController
             }
         }
 
-        if (!$videoData['provider'] && $vimeoUrl) {
+        if (($videoSource=='vimeo_url' || !$videoData['provider']) && $vimeoUrl) {
             $vimeoEmbedUrl = $this->getVimeoEmbedUrl($vimeoUrl);
             if ($vimeoEmbedUrl) {
                 $videoData['provider'] = 'vimeo';

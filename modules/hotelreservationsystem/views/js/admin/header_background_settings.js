@@ -21,7 +21,14 @@ $(document).ready(function () {
 
         if (bgType === 'video') {
             $('.wk-bg-type-video').show();
+            toggleVideoSourceFields();
         }
+    }
+
+    function toggleVideoSourceFields() {
+        var videoSource = $('#WK_BG_VIDEO_SOURCE').val() || 'upload_video';
+        $('.wk-bg-video-source-upload_video, .wk-bg-video-source-youtube_url, .wk-bg-video-source-vimeo_url').hide();
+        $('.wk-bg-video-source-' + videoSource).show();
     }
 
     function updateSliderEmptyState() {
@@ -127,6 +134,7 @@ $(document).ready(function () {
     updateSliderEmptyState();
 
     $(document).on('change', '#WK_BG_MEDIA_TYPE', toggleBackgroundTypeFields);
+    $(document).on('change', '#WK_BG_VIDEO_SOURCE', toggleVideoSourceFields);
 
     $(document).on('click', '.wk-bg-delete-media', function (event) {
         event.preventDefault();

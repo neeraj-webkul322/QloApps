@@ -519,7 +519,7 @@ class HotelReservationSystemDb
             (3, 'icon-plus-square', 'index.php?controller=AdminRoomTypeGlobalDemand', 0, 3, 1, 1, NOW(), NOW()),
             (4, 'icon-file-text', 'index.php?controller=AdminAboutHotelBlockSetting', 0, 4, 0, 1, NOW(), NOW()),
             (5, 'icon-th-list', 'index.php?controller=AdminFeaturesModuleSetting', 0, 5, 0, 1, NOW(), NOW()),
-            (6, 'icon-picture-o', 'index.php?controller=AdminHotelBackgroundImageSettings', 0, 6, 1, 1, NOW(), NOW());",
+            (6, 'icon-picture-o', 'index.php?controller=AdminHeaderBackgroundSettings', 0, 6, 1, 1, NOW(), NOW());",
 
             "CREATE TABLE IF NOT EXISTS `"._DB_PREFIX_."htl_settings_link_lang` (
                 `id_settings_link` int(10) unsigned NOT NULL,
@@ -554,9 +554,18 @@ class HotelReservationSystemDb
             FROM `"._DB_PREFIX_."lang`
             ORDER BY `id_lang`;",
             "INSERT INTO `"._DB_PREFIX_."htl_settings_link_lang` (`id_settings_link`, `id_lang`, `name`, `hint`)
-            SELECT 6, `id_lang`, 'Background Image Settings', 'Configure the homepage background type and media inputs.'
+            SELECT 6, `id_lang`, 'Header Background Settings', 'Configure the homepage background type and media inputs.'
             FROM `"._DB_PREFIX_."lang`
             ORDER BY `id_lang`;",
+
+            "CREATE TABLE IF NOT EXISTS `"._DB_PREFIX_."header_slider_images` (
+                `id_header_slider_image` int(11) unsigned NOT NULL AUTO_INCREMENT,
+                `image_path` varchar(255) NOT NULL,
+                `position` int(11) unsigned NOT NULL DEFAULT '0',
+                `date_add` datetime NOT NULL,
+                `date_upd` datetime NOT NULL,
+                PRIMARY KEY (`id_header_slider_image`)
+            ) ENGINE="._MYSQL_ENGINE_." DEFAULT CHARSET=utf8 AUTO_INCREMENT=1;",
         );
     }
 
@@ -620,7 +629,8 @@ class HotelReservationSystemDb
             `'._DB_PREFIX_.'htl_room_type_bed_type`,
             `'._DB_PREFIX_.'htl_access`,
             `'._DB_PREFIX_.'htl_settings_link`,
-            `'._DB_PREFIX_.'htl_settings_link_lang`'
+            `'._DB_PREFIX_.'htl_settings_link_lang`,
+            `'._DB_PREFIX_.'header_slider_images`'
         );
     }
 }

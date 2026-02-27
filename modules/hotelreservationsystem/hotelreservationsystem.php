@@ -562,7 +562,7 @@ class HotelReservationSystem extends Module
         $this->installTab('AdminHotelBedTypes', 'Bed Types', 'AdminCatalog');
         // Controllers without tabs
         $this->installTab('AdminHotelGeneralSettings', 'Hotel General Configuration', 'AdminHotelConfigurationSetting', false);
-        $this->installTab('AdminHotelBackgroundImageSettings', 'Background Image Settings', 'AdminHotelConfigurationSetting', false);
+        $this->installTab('AdminHeaderBackgroundSettings', 'Header Background Settings', 'AdminHotelConfigurationSetting', false);
         $this->installTab('AdminHotelFeaturePricesSettings', 'Advanced Price Rules', 'AdminHotelConfigurationSetting', false);
         $this->installTab('AdminRoomTypeGlobalDemand', 'Additional Demand Configuration', 'AdminHotelConfigurationSetting', false);
         $this->installTab('AdminBookingDocument', 'Booking Documents', false, false);

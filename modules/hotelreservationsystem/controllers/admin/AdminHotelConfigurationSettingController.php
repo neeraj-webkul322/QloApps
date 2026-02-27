@@ -217,7 +217,7 @@ class AdminHotelConfigurationSettingController extends ModuleAdminController
 
     protected function ensureBackgroundImageSettingsLink()
     {
-        $controllerName = 'AdminHotelBackgroundImageSettings';
+        $controllerName = 'AdminHeaderBackgroundSettings';
         $link = 'index.php?controller='.$controllerName;
         $idTab = (int) Tab::getIdFromClassName($controllerName);
 
@@ -229,7 +229,7 @@ class AdminHotelConfigurationSettingController extends ModuleAdminController
             $tab->id_parent = (int) Tab::getIdFromClassName('AdminHotelConfigurationSetting');
             $tab->name = array();
             foreach (Language::getLanguages(true) as $language) {
-                $tab->name[$language['id_lang']] = 'Background Image Settings';
+                $tab->name[$language['id_lang']] = 'Header Background Settings';
             }
             $tab->add();
         }
@@ -251,7 +251,7 @@ class AdminHotelConfigurationSettingController extends ModuleAdminController
             $objSettingsLink->name = array();
             $objSettingsLink->hint = array();
             foreach (Language::getLanguages(false) as $language) {
-                $objSettingsLink->name[(int) $language['id_lang']] = 'Background Image Settings';
+                $objSettingsLink->name[(int) $language['id_lang']] = 'Header Background Settings';
                 $objSettingsLink->hint[(int) $language['id_lang']] = 'Configure the homepage background type and media inputs.';
             }
 

@@ -21,7 +21,7 @@
 * @license https://opensource.org/license/osl-3-0-php Open Software License version 3.0
 */
 
-class AdminHotelBackgroundImageSettingsController extends ModuleAdminController
+class AdminHeaderBackgroundSettingsController extends ModuleAdminController
 {
     const BG_TYPE_IMAGE = 'image';
     const BG_TYPE_SLIDER = 'slider';
@@ -29,26 +29,34 @@ class AdminHotelBackgroundImageSettingsController extends ModuleAdminController
 
     public function __construct()
     {
+        $this->loadHeaderSliderImageClass();
         $this->table = 'configuration';
         $this->className = 'Configuration';
         $this->bootstrap = true;
         parent::__construct();
     }
 
+    protected function loadHeaderSliderImageClass()
+    {
+        if (!class_exists('HeaderSliderImage')) {
+            require_once _PS_MODULE_DIR_.'hotelreservationsystem/classes/HeaderSliderImage.php';
+        }
+    }
+
     public function initPageHeaderToolbar()
     {
         parent::initPageHeaderToolbar();
-        $this->page_header_toolbar_title = $this->l('Background Image Settings');
+        $this->page_header_toolbar_title = $this->l('Header Background Settings');
     }
 
     public function setMedia()
     {
         parent::setMedia();
         $this->addJS(_PS_JS_DIR_.'jquery/plugins/jquery.tablednd.js');
-        $this->addJS($this->module->getPathUri().'views/js/admin/background_image_settings.js');
+        $this->addJS($this->module->getPathUri().'views/js/admin/header_background_settings.js');
         Media::addJsDef(
             array(
-                'wkBgDeleteAjaxUrl' => $this->context->link->getAdminLink('AdminHotelBackgroundImageSettings', true),
+                'wkBgDeleteAjaxUrl' => $this->context->link->getAdminLink('AdminHeaderBackgroundSettings', true),
                 'deleteConfirm' => $this->l('Are you sure want to delete?'),
             )
         );
@@ -59,6 +67,10 @@ class AdminHotelBackgroundImageSettingsController extends ModuleAdminController
         $selectedType = $this->normalizeBackgroundType(Configuration::get('WK_BG_MEDIA_TYPE'));
         $storedBackgroundImage = trim((string) Configuration::get('WK_BG_IMAGE'));
         $storedVideoPath = trim((string) Configuration::get('WK_BG_VIDEO'));
+        $videoSource = trim((string) Configuration::get('WK_BG_VIDEO_SOURCE'));
+        if (!$videoSource || !in_array($videoSource, array('upload_video', 'youtube_url', 'vimeo_url'), true)) {
+            $videoSource = 'upload_video';
+        }
         $youtubeUrl = trim((string) Configuration::get('WK_BG_VIDEO_YOUTUBE'));
         $vimeoUrl = trim((string) Configuration::get('WK_BG_VIDEO_VIMEO'));
         $imagePreviewHtml = '';
@@ -70,7 +82,7 @@ class AdminHotelBackgroundImageSettingsController extends ModuleAdminController
             $imageDeleteIcon = $this->getDeleteIconHtml('WK_BG_IMAGE', '', true);
             $imagePreviewHtml = '
                 <div id="wk-bg-image-preview-wrapper" class="wk-bg-image-preview-wrapper" style="display:flex;align-items:flex-end;">
-                    <img src="'.$escapedImageUrl.'" alt="" style="width: 200px; height: 100px; object-fit: cover; border: 1px solid #d3d8db;" />
+                    <img src="'.$escapedImageUrl.'" alt="" style="width: 370px; height: 182px; object-fit: cover; border: 1px solid #d3d8db;" />
                     <span style="margin-left:8px;">'.$imageDeleteIcon.'</span>
                 </div>';
         }
@@ -81,7 +93,7 @@ class AdminHotelBackgroundImageSettingsController extends ModuleAdminController
             $videoDeleteIcon = $this->getDeleteIconHtml('WK_BG_VIDEO', '', true);
             $videoPreviewHtml = '
                 <div id="wk-bg-video-preview-wrapper" class="wk-bg-video-preview-wrapper">
-                    <video controls style="width: 200px; height: 100px; object-fit: cover; border: 1px solid #d3d8db;">
+                    <video controls style="width: 370px; height: 182px; object-fit: cover; border: 1px solid #d3d8db;">
                         <source src="'.$escapedVideoUrl.'" type="video/mp4" />
                     </video>
                     <span style="margin-left:8px;">'.$videoDeleteIcon.'</span>
@@ -118,17 +130,33 @@ class AdminHotelBackgroundImageSettingsController extends ModuleAdminController
                 'form_group_class' => 'wk-bg-type-slider collapse',
             ),
             array(
+                'type' => 'select',
+                'label' => $this->l('Video source'),
+                'name' => 'WK_BG_VIDEO_SOURCE',
+                'required' => true,
+                'form_group_class' => 'wk-bg-type-video wk-bg-video-source-selector collapse',
+                'options' => array(
+                    'query' => array(
+                        array('id' => 'upload_video', 'name' => $this->l('Upload video')),
+                        array('id' => 'youtube_url', 'name' => $this->l('YouTube URL')),
+                        array('id' => 'vimeo_url', 'name' => $this->l('Vimeo URL')),
+                    ),
+                    'id' => 'id',
+                    'name' => 'name',
+                ),
+            ),
+            array(
                 'type' => 'file',
                 'label' => $this->l('Upload video file'),
                 'name' => 'WK_BG_VIDEO_FILE',
-                'form_group_class' => 'wk-bg-type-video collapse',
+                'form_group_class' => 'wk-bg-type-video wk-bg-video-source-upload_video collapse',
             ),
             array(
                 'type' => 'text',
                 'label' => $this->l('YouTube URL'),
                 'name' => 'WK_BG_VIDEO_YOUTUBE',
                 'class' => 'fixed-width-xxl',
-                'form_group_class' => 'wk-bg-type-video collapse',
+                'form_group_class' => 'wk-bg-type-video wk-bg-video-source-youtube_url collapse',
                 'suffix' => $youtubeUrl ? $this->getDeleteIconHtml('WK_BG_VIDEO_YOUTUBE', '#WK_BG_VIDEO_YOUTUBE') : '',
             ),
             array(
@@ -136,7 +164,7 @@ class AdminHotelBackgroundImageSettingsController extends ModuleAdminController
                 'label' => $this->l('Vimeo URL'),
                 'name' => 'WK_BG_VIDEO_VIMEO',
                 'class' => 'fixed-width-xxl',
-                'form_group_class' => 'wk-bg-type-video collapse',
+                'form_group_class' => 'wk-bg-type-video wk-bg-video-source-vimeo_url collapse',
                 'suffix' => $vimeoUrl ? $this->getDeleteIconHtml('WK_BG_VIDEO_VIMEO', '#WK_BG_VIDEO_VIMEO') : '',
             ),
         );
@@ -157,24 +185,25 @@ class AdminHotelBackgroundImageSettingsController extends ModuleAdminController
                 'label' => $this->l('Current uploaded video'),
                 'name' => 'WK_BG_VIDEO_PREVIEW',
                 'html_content' => $videoPreviewHtml,
-                'form_group_class' => 'wk-bg-type-video collapse',
+                'form_group_class' => 'wk-bg-type-video wk-bg-video-source-upload_video collapse',
             );
         }
 
         $this->fields_form = array(
             'legend' => array(
-                'title' => $this->l('Background Image Settings'),
+                'title' => $this->l('Header Background Settings'),
                 'icon' => 'icon-picture-o',
             ),
             'input' => $formInputs,
             'submit' => array(
                 'title' => $this->l('Save'),
-                'name' => 'submitBackgroundImageSettings',
+                'name' => 'submitHeaderBackgroundSettings',
             ),
         );
 
         $this->fields_value = array(
             'WK_BG_MEDIA_TYPE' => $selectedType,
+            'WK_BG_VIDEO_SOURCE' => $videoSource,
             'WK_BG_VIDEO_YOUTUBE' => $youtubeUrl,
             'WK_BG_VIDEO_VIMEO' => $vimeoUrl,
         );
@@ -228,7 +257,43 @@ class AdminHotelBackgroundImageSettingsController extends ModuleAdminController
     protected function saveSliderImages(array $sliderImages)
     {
         $normalized = $this->normalizeSliderImagesForSave($sliderImages);
-        return Configuration::updateValue('WK_BG_SLIDER_IMAGES', json_encode($normalized));
+        $existingImages = HeaderSliderImage::getAllSliderImages();
+        $existingById = array();
+        foreach ($existingImages as $existingRow) {
+            $existingById[(int) $existingRow['id_header_slider_image']] = $existingRow;
+        }
+
+        $savedIds = array();
+        foreach ($normalized as $row) {
+            $idSliderImage = isset($row['id']) ? (int) $row['id'] : 0;
+            if ($idSliderImage && isset($existingById[$idSliderImage])) {
+                $objSliderImage = new HeaderSliderImage($idSliderImage);
+                if (Validate::isLoadedObject($objSliderImage)) {
+                    $objSliderImage->image_path = (string) $row['path'];
+                    $objSliderImage->position = (int) $row['position'];
+                    $objSliderImage->update();
+                    $savedIds[] = $objSliderImage->id;
+                }
+            } else {
+                $objSliderImage = new HeaderSliderImage();
+                $objSliderImage->image_path = (string) $row['path'];
+                $objSliderImage->position = (int) $row['position'];
+                if ($objSliderImage->add()) {
+                    $savedIds[] = $objSliderImage->id;
+                }
+            }
+        }
+
+        foreach ($existingById as $existingId => $existingRow) {
+            if (!in_array((int) $existingId, $savedIds, true)) {
+                $objSliderImage = new HeaderSliderImage((int) $existingId);
+                if (Validate::isLoadedObject($objSliderImage)) {
+                    $objSliderImage->delete();
+                }
+            }
+        }
+
+        return true;
     }
 
     protected function renderSliderImagesPanel()
@@ -305,23 +370,14 @@ class AdminHotelBackgroundImageSettingsController extends ModuleAdminController
 
     protected function getCurrentSliderImages()
     {
-        $stored = Configuration::get('WK_BG_SLIDER_IMAGES');
-        $decoded = json_decode((string) $stored, true);
-        if (!is_array($decoded)) {
-            return array();
-        }
-
         $images = array();
-        foreach ($decoded as $row) {
-            if (!is_array($row)) {
-                continue;
-            }
-            if (!isset($row['path']) || !Validate::isCleanHtml($row['path'])) {
+        foreach (HeaderSliderImage::getAllSliderImages() as $row) {
+            if (!isset($row['image_path']) || !Validate::isCleanHtml($row['image_path'])) {
                 continue;
             }
             $images[] = array(
-                'id' => isset($row['id']) ? (int) $row['id'] : 0,
-                'path' => (string) $row['path'],
+                'id' => (int) $row['id_header_slider_image'],
+                'path' => (string) $row['image_path'],
                 'position' => isset($row['position']) ? (int) $row['position'] : 0,
             );
         }
@@ -363,6 +419,24 @@ class AdminHotelBackgroundImageSettingsController extends ModuleAdminController
             $this->ajaxDie(json_encode($response));
         }
 
+        // Try to remove physical file when configuration holds a module-local file path
+        $currentValue = trim((string) Configuration::get($deleteKey));
+        if ($currentValue) {
+            $relative = ltrim($currentValue, '/');
+            // Prefer known module directories
+            if (strpos($relative, 'views/img') === 0) {
+                $absPath = $this->getSliderImageDirectoryAbs().basename($relative);
+            } elseif (strpos($relative, 'views/video') === 0) {
+                $absPath = $this->getVideoDirectoryAbs().basename($relative);
+            } else {
+                $absPath = _PS_MODULE_DIR_.$this->module->name.'/'. $relative;
+            }
+
+            if (isset($absPath) && file_exists($absPath) && is_file($absPath)) {
+                @unlink($absPath);
+            }
+        }
+
         if (Configuration::deleteByName($deleteKey)) {
             $response['success'] = true;
             $response['message'] = $this->l('Configuration deleted successfully.');
@@ -391,8 +465,20 @@ class AdminHotelBackgroundImageSettingsController extends ModuleAdminController
         foreach ($sliderImages as $row) {
             if ((int) $row['id'] === $imageId) {
                 $isDeleted = true;
-                $filePath = _PS_MODULE_DIR_.$this->module->name.'/'.ltrim($row['path'], '/');
-                if (file_exists($filePath)) {
+                $relative = ltrim((string) $row['path'], '/');
+                // Prefer known slider image directory
+                if (strpos($relative, 'views/img') === 0) {
+                    $filePath = $this->getSliderImageDirectoryAbs().basename($relative);
+                } else {
+                    $filePath = _PS_MODULE_DIR_.$this->module->name.'/'. $relative;
+                }
+
+                if (!file_exists($filePath)) {
+                    // Fallback: try basename in slider dir
+                    $filePath = $this->getSliderImageDirectoryAbs().basename($relative);
+                }
+
+                if (file_exists($filePath) && is_file($filePath)) {
                     @unlink($filePath);
                 }
                 continue;
@@ -532,7 +618,7 @@ class AdminHotelBackgroundImageSettingsController extends ModuleAdminController
         }
 
         return array(
-            'id' => (int) $position,
+            'id' => 0,
             'path' => 'views/img/imgSlider/'.$fileName,
             'position' => (int) $position,
             'url' => $this->buildSliderImageUrl('views/img/imgSlider/'.$fileName),
@@ -634,8 +720,12 @@ class AdminHotelBackgroundImageSettingsController extends ModuleAdminController
 
     public function postProcess()
     {
-        if (Tools::isSubmit('submitBackgroundImageSettings')) {
+        if (Tools::isSubmit('submitHeaderBackgroundSettings')) {
             $mediaType = $this->normalizeBackgroundType(Tools::getValue('WK_BG_MEDIA_TYPE'));
+            $videoSource = trim((string) Tools::getValue('WK_BG_VIDEO_SOURCE'));
+            if (!in_array($videoSource, array('upload_video', 'youtube_url', 'vimeo_url'), true)) {
+                $videoSource = 'upload_video';
+            }
             $youtubeUrl = trim((string) Tools::getValue('WK_BG_VIDEO_YOUTUBE'));
             $vimeoUrl = trim((string) Tools::getValue('WK_BG_VIDEO_VIMEO'));
             $sliderImages = $this->getCurrentSliderImages();
@@ -643,29 +733,33 @@ class AdminHotelBackgroundImageSettingsController extends ModuleAdminController
             $uploadedVideo = (string) Configuration::get('WK_BG_VIDEO');
 
             if ($mediaType === self::BG_TYPE_VIDEO) {
-                if ($youtubeUrl) {
-                    if(!$this->isValidYoutubeUrl($youtubeUrl)){
+                if ($videoSource === 'upload_video') {
+                    if (isset($_FILES['WK_BG_VIDEO_FILE']) && !empty($_FILES['WK_BG_VIDEO_FILE']['name'])) {
+                        $uploadedVideoPath = $this->uploadVideoFile($_FILES['WK_BG_VIDEO_FILE']);
+                        if ($uploadedVideoPath) {
+                            $uploadedVideo = $uploadedVideoPath;
+                            Configuration::updateValue('WK_BG_VIDEO', $uploadedVideo);
+                        }
+                    }
+                    if (!$uploadedVideo) {
+                        $this->errors[] = $this->l('Please upload a video file for video background.');
+                    }
+                } elseif ($videoSource === 'youtube_url') {
+                    if (!$youtubeUrl) {
+                        $this->errors[] = $this->l('Please provide YouTube URL for video background.');
+                    } elseif (!$this->isValidYoutubeUrl($youtubeUrl)) {
                         $this->errors[] = $this->l('Invalid YouTube URL.');
-                    }else{
+                    } else {
                         Configuration::updateValue('WK_BG_VIDEO_YOUTUBE', $youtubeUrl);
                     }
-                }
-                if ($vimeoUrl) {
-                    if(!$this->isValidVimeoUrl($vimeoUrl)){
+                } elseif ($videoSource === 'vimeo_url') {
+                    if (!$vimeoUrl) {
+                        $this->errors[] = $this->l('Please provide Vimeo URL for video background.');
+                    } elseif (!$this->isValidVimeoUrl($vimeoUrl)) {
                         $this->errors[] = $this->l('Invalid Vimeo URL.');
-                    }else{
+                    } else {
                         Configuration::updateValue('WK_BG_VIDEO_VIMEO', $vimeoUrl);
                     }
-                }
-                if (isset($_FILES['WK_BG_VIDEO_FILE']) && !empty($_FILES['WK_BG_VIDEO_FILE']['name'])) {
-                    $uploadedVideoPath = $this->uploadVideoFile($_FILES['WK_BG_VIDEO_FILE']);
-                    if ($uploadedVideoPath) {
-                        $uploadedVideo = $uploadedVideoPath;
-                        Configuration::updateValue('WK_BG_VIDEO', $uploadedVideo);
-                    }
-                }
-                if (!$youtubeUrl && !$vimeoUrl && !$uploadedVideo) {
-                    $this->errors[] = $this->l('Please upload a video file or provide a YouTube/Vimeo URL for video background.');
                 }
             } elseif ($mediaType === self::BG_TYPE_IMAGE) {
                 if (isset($_FILES['WK_BG_IMAGE_FILE']) && !empty($_FILES['WK_BG_IMAGE_FILE']['name'])) {
@@ -694,6 +788,7 @@ class AdminHotelBackgroundImageSettingsController extends ModuleAdminController
                     $this->saveSliderImages($sliderImages);
                 }
                 Configuration::updateValue('WK_BG_MEDIA_TYPE', $mediaType);
+                Configuration::updateValue('WK_BG_VIDEO_SOURCE', $videoSource);
 
                 Tools::redirectAdmin(self::$currentIndex.'&conf=6&token='.$this->token);
             }
