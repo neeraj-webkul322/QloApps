@@ -214,12 +214,29 @@ $(document).ready(function() {
 
     function getSearchData()
     {
+        var numRooms = 1;
+        // Get num_rooms from occupancy blocks if occupancy-wise search
+        if (occupancy.length) {
+            numRooms = occupancy.length;
+        } else if (Object.entries(occupancy).length) {
+            numRooms = Object.entries(occupancy).length;
+        } else if ($('#search_num_rooms').length) {
+            numRooms = $('#search_num_rooms').val();
+        }
+
         return {
             search_id_room_type: $("#search_id_room_type").val(),
             search_id_hotel: $("#search_id_hotel").val(),
             search_date_from: $("#search_date_from").val(),
             search_date_to: $("#search_date_to").val(),
+            search_num_rooms: numRooms,
         }
+    }
+
+    function updateNumRoomsHiddenField(booking_occupancy_wrapper)
+    {
+        var numRooms = $(booking_occupancy_wrapper).find('.occupancy_info_block').length;
+        $('#search_num_rooms').val(numRooms);
     }
 
     // toggleSearchFields();
@@ -619,6 +636,9 @@ $(document).ready(function() {
             $(this).text(room_txt + ' - '+ (key+1) );
         });
         setRoomTypeGuestOccupancy($(booking_occupancy_inner).closest('.booking_occupancy_wrapper'));
+        
+        // Update num_rooms hidden field
+        updateNumRoomsHiddenField($(booking_occupancy_inner).closest('.booking_occupancy_wrapper'));
     });
 
     $(document).on('change', '.num_occupancy', function(e) {
@@ -805,6 +825,9 @@ $(document).ready(function() {
         $(booking_occupancy_wrapper).find('.booking_occupancy_inner').append(occupancy_block);
 
         setRoomTypeGuestOccupancy(booking_occupancy_wrapper);
+        
+        // Update num_rooms hidden field
+        updateNumRoomsHiddenField(booking_occupancy_wrapper);
     });
 
     function setRoomTypeGuestOccupancy(booking_occupancy_wrapper)

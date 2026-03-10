@@ -246,7 +246,7 @@
 				<div class="tip_element_head">{l s='Unavailable Rooms' mod='hotelreservationsystem'}</div>
 				<div class="tip_element_value"></div>
 			</div>
-            <div class="num_part_avai">
+         <div class="num_part_avai">
 				<div class="tip_element_head">{l s='Partially Available Rooms' mod='hotelreservationsystem'}</div>
 				<div class="tip_element_value"></div>
 			</div>

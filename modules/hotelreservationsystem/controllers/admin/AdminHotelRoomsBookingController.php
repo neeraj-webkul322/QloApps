@@ -319,7 +319,8 @@ class AdminHotelRoomsBookingController extends ModuleAdminController
             'is_occupancy_wise_search' => $isOccupancyWiseSearch,
         ));
         MediaCore::addJsDef(array(
-            'initialDate' => $this->date_from
+            'initialDate' => $this->date_from,
+            'occupancy' => $this->occupancy,
         ));
 
     }
@@ -509,10 +510,10 @@ class AdminHotelRoomsBookingController extends ModuleAdminController
     public function ajaxProcessGetCalenderData()
     {
         $events = array();
-        // No use of adults, child, num_rooms
+        // Get num_rooms from request
         $adults = 0;
         $children = 0;
-        $num_rooms = 1;
+        $num_rooms = Tools::getValue('search_num_rooms', 1);
 
         $start_date = date('Y-m-d', strtotime(Tools::getValue('start')));
         $last_day_this_month  = date('Y-m-d', strtotime(Tools::getValue('end')));
@@ -570,15 +571,18 @@ class AdminHotelRoomsBookingController extends ModuleAdminController
         $bookingParams['date_from'] = $searchDateFrom;
         $bookingParams['date_to'] = $searchDateTo;
         if ($bookingData = $objBookingDetail->getBookingData($bookingParams)) {
-            if ($bookingData['stats']['num_avail']) {
+            if ($bookingData['stats']['num_avail'] >= $num_rooms) {
                 $eventColor = '#325531ff';
                 $title = sprintf($this->l('  %s  Available Rooms'), $bookingData['stats']['num_avail']);
-            } elseif ($bookingData['stats']['num_part_avai']) {
-                $eventColor = '#FFC224';
+            } elseif ($bookingData['stats']['num_avail'] > 0) {
+                $eventColor = '#d62222ff';
+                $title = sprintf($this->l(' %s  Available Rooms'), $bookingData['stats']['num_avail']);
+            } elseif ($bookingData['stats']['num_part_avai'] > 0) {
+                $eventColor = '#d62222ff';
                 $title = sprintf($this->l('  %s  Partially Available Rooms'), $bookingData['stats']['num_part_avai']);
             } else {
                 $eventColor = '#d62222ff';
-                $title = sprintf($this->l('  %s  Available Rooms'), $bookingData['stats']['num_avail']);
+                $title = $this->l('  Not Available');
             }
             $bookingData['date_from_format'] = Tools::displayDate($searchDateFrom);
             $bookingData['date_to_format'] = Tools::displayDate($searchDateTo);
