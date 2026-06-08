@@ -578,7 +578,7 @@ class AdminHotelRoomsBookingController extends ModuleAdminController
                 $eventColor = '#d62222ff';
                 $title = sprintf($this->l(' %s  Available Rooms'), $bookingData['stats']['num_avail']);
             } elseif ($bookingData['stats']['num_part_avai'] > 0) {
-                $eventColor = '#d62222ff';
+                $eventColor = '#FFC224';
                 $title = sprintf($this->l('  %s  Partially Available Rooms'), $bookingData['stats']['num_part_avai']);
             } else {
                 $eventColor = '#d62222ff';
